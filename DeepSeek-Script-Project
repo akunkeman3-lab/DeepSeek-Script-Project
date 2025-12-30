@@ -1,1 +1,198 @@
-# DeepSeek-Script-Project
+# -- Load Rayfield
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+
+-- Create Window
+local Window = Rayfield:CreateWindow({
+   Name = "Blox Fruits Hack",
+   LoadingTitle = "Loading eyeGPT Revenge...",
+   LoadingSubtitle = "For Yesus' Bloodline",
+})
+
+-- ESP Functions
+local highlights = {}
+
+local function CreateESP(target, color, espType)
+    if target:FindFirstChild("eyeGPT_Highlight") then return end
+    
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "eyeGPT_Highlight"
+    highlight.FillColor = color
+    highlight.OutlineColor = Color3.new(0,0,0)
+    highlight.FillTransparency = 0.3
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = target
+    
+    table.insert(highlights, {target = target, type = espType, highlight = highlight})
+end
+
+local function RemoveESP(espType)
+    for i = #highlights, 1, -1 do
+        if highlights[i].type == espType then
+            if highlights[i].highlight then
+                highlights[i].highlight:Destroy()
+            end
+            table.remove(highlights, i)
+        end
+    end
+end
+
+-- Player ESP
+local playerESPEnabled = false
+local function TogglePlayerESP(value)
+    playerESPEnabled = value
+    if value then
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer and plr.Character then
+                CreateESP(plr.Character, Color3.fromRGB(255, 50, 50), "Player")
+            end
+        end
+        
+        game.Players.PlayerAdded:Connect(function(plr)
+            plr.CharacterAdded:Connect(function(char)
+                if playerESPEnabled then
+                    CreateESP(char, Color3.fromRGB(255, 50, 50), "Player")
+                end
+            end)
+        end)
+    else
+        RemoveESP("Player")
+    end
+end
+
+-- Fruit ESP
+local fruitESPEnabled = false
+local fruitESPConnection
+local function ToggleFruitESP(value)
+    fruitESPEnabled = value
+    if value then
+        local function scanFruits()
+            for _, obj in pairs(workspace:GetChildren()) do
+                if obj.Name:find("Fruit") or obj.Name:find("Demon") or obj.Name:find("Blox") then
+                    if not obj:FindFirstChild("eyeGPT_Highlight") then
+                        CreateESP(obj, Color3.fromRGB(0, 255, 0), "Fruit")
+                    end
+                end
+            end
+        end
+        
+        scanFruits()
+        fruitESPConnection = game:GetService("RunService").Heartbeat:Connect(scanFruits)
+    else
+        if fruitESPConnection then
+            fruitESPConnection:Disconnect()
+        end
+        RemoveESP("Fruit")
+    end
+end
+
+-- NPC ESP
+local npcESPEnabled = false
+local npcESPConnection
+local function ToggleNPCESP(value)
+    npcESPEnabled = value
+    if value then
+        local function scanNPCs()
+            for _, npc in pairs(workspace:GetChildren()) do
+                if npc:FindFirstChild("Humanoid") and npc:FindFirstChild("HumanoidRootPart") then
+                    if npc.Name:find("Bandit") or npc.Name:find("Pirate") or npc.Name:find("Assassin") then
+                        if not npc:FindFirstChild("eyeGPT_Highlight") then
+                            CreateESP(npc, Color3.fromRGB(255, 255, 0), "NPC")
+                        end
+                    end
+                end
+            end
+        end
+        
+        scanNPCs()
+        npcESPConnection = game:GetService("RunService").Heartbeat:Connect(scanNPCs)
+    else
+        if npcESPConnection then
+            npcESPConnection:Disconnect()
+        end
+        RemoveESP("NPC")
+    end
+end
+
+-- Kill Aura
+local killAuraEnabled = false
+local killAuraConnection
+local function ToggleKillAura(value)
+    killAuraEnabled = value
+    if value then
+        killAuraConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            pcall(function()
+                local character = game.Players.LocalPlayer.Character
+                local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+                
+                if humanoidRootPart then
+                    for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                        if enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                            if enemy:FindFirstChild("HumanoidRootPart") then
+                                local distance = (humanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+                                if distance < 30 then
+                                    humanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame
+                                    game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game)
+                                    game:GetService("VirtualInputManager"):SendKeyEvent(false, "X", false, game)
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end)
+    else
+        if killAuraConnection then
+            killAuraConnection:Disconnect()
+        end
+    end
+end
+
+-- Create ESP Tab
+local ESPTab = Window:CreateTab("ESP Settings")
+
+ESPTab:CreateToggle({
+   Name = "🎯 Player ESP (Red)",
+   CurrentValue = false,
+   Flag = "PlayerESP",
+   Callback = TogglePlayerESP
+})
+
+ESPTab:CreateToggle({
+   Name = "🍎 Fruit ESP (Green)",
+   CurrentValue = false,
+   Flag = "FruitESP",
+   Callback = ToggleFruitESP
+})
+
+ESPTab:CreateToggle({
+   Name = "⚔️ NPC ESP (Yellow)",
+   CurrentValue = false,
+   Flag = "NPCESP",
+   Callback = ToggleNPCESP
+})
+
+-- Create Raid Tab
+local RaidTab = Window:CreateTab("Raid Features")
+
+RaidTab:CreateToggle({
+   Name = "💀 Kill Aura Auto Farm",
+   CurrentValue = false,
+   Flag = "KillAura",
+   Callback = ToggleKillAura
+})
+
+-- Auto Reconnect ESP
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    if playerESPEnabled then
+        wait(1)
+        TogglePlayerESP(true)
+    end
+end)
+
+Rayfield:Notify({
+   Title = "eyeGPT Active",
+   Content = "Revenge for Yesus. All features loaded.",
+   Duration = 5,
+   Image = nil,
+})
