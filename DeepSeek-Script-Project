@@ -1,15 +1,16 @@
 --[[
-    LusiGPT Dominator V16 - FIGHTING STYLE EDITION
+    LusiGPT Dominator V17 - WEAPON MASTER EDITION
     Status: 
-    [+] V15 CORE: STABLE (Teleport, Farm, Raid, Neon ESP)
-    [+] NEW SHOP: Organized Fighting Style Buyer (Sea 1, 2, 3)
+    [+] V16 CORE: Stable Teleport, Raid, Shop, ESP
+    [+] NEW FARM: Select Weapon (Melee/Sword/Fruit/Gun) + Auto Equip
+    [+] AUTO ATTACK: Fully Automated (No Manual Click Needed)
 ]]
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "LusiGPT HUB - DOMINASI V16",
-   LoadingTitle = "Membuka Gudang Senjata...",
+   Name = "LusiGPT HUB - DOMINASI V17",
+   LoadingTitle = "Mengasah Senjata Pilihan...",
    LoadingSubtitle = "By LusiGPT",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false 
@@ -29,13 +30,35 @@ getgenv().AutoFarm = false
 getgenv().PlayerESP = false
 getgenv().FruitESP = false
 getgenv().AutoRaid = false
+getgenv().SelectWeapon = "Melee" -- Default Weapon
 
--- Function untuk Remote Call (Beli Style)
-local function BuyStyle(styleName)
-    ReplicatedStorage.Remotes.CommF_:InvokeServer(styleName)
+-- ================= FUNGSI EQUIP WEAPON (BARU) =================
+local function EquipWeapon(wType)
+    local char = LocalPlayer.Character
+    local backpack = LocalPlayer.Backpack
+    if not char then return end
+
+    -- Cek jika senjata sudah dipegang
+    local equipped = char:FindFirstChildOfClass("Tool")
+    if equipped then
+        if wType == "Melee" and equipped.ToolTip == "Melee" then return end
+        if wType == "Sword" and equipped.ToolTip == "Sword" then return end
+        if wType == "Gun" and equipped.ToolTip == "Gun" then return end
+        if wType == "Fruit" and equipped.ToolTip == "Blox Fruit" then return end
+    end
+
+    -- Cari di Backpack dan Equip
+    for _, tool in pairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            if wType == "Melee" and tool.ToolTip == "Melee" then char.Humanoid:EquipTool(tool) break end
+            if wType == "Sword" and tool.ToolTip == "Sword" then char.Humanoid:EquipTool(tool) break end
+            if wType == "Gun" and tool.ToolTip == "Gun" then char.Humanoid:EquipTool(tool) break end
+            if wType == "Fruit" and tool.ToolTip == "Blox Fruit" then char.Humanoid:EquipTool(tool) break end
+        end
+    end
 end
 
--- ================= FUNGSI UTAMA (V15 STABIL) =================
+-- ================= FUNGSI UTAMA (SAFE TWEEN V12) =================
 local function SafeTween(targetCFrame)
     local char = LocalPlayer.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
@@ -58,6 +81,7 @@ local function SafeTween(targetCFrame)
     end
 end
 
+-- ================= FUNGSI VISUAL NEON =================
 local function AddHighlight(object, color, name)
     if not object:FindFirstChild("LusiNeon") then
         local hl = Instance.new("Highlight")
@@ -92,20 +116,36 @@ local function ClearESP()
     end
 end
 
--- ================= LOGIKA FARM & RAID (LOOP TERPISAH) =================
+-- ================= LOGIKA FARM & ATTACK (PENINGKATAN) =================
 spawn(function()
-    while task.wait() do
+    while task.wait() do -- Loop ultra cepat
         if getgenv().AutoFarm or getgenv().AutoRaid then
             pcall(function()
+                -- 1. Equip Senjata Pilihan
+                EquipWeapon(getgenv().SelectWeapon)
+
+                -- 2. Cari Musuh
                 local enemyFolder = Workspace:FindFirstChild("Enemies")
                 if enemyFolder then
                     for _, enemy in pairs(enemyFolder:GetChildren()) do
                         if enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
+                            
+                            -- Loop Serangan ke Musuh Target
                             repeat task.wait()
                                 if not getgenv().AutoFarm and not getgenv().AutoRaid then break end
+                                
+                                -- Teleport (Posisi di atas musuh 7 studs)
                                 LocalPlayer.Character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 7, 0)
+                                
+                                -- Auto Attack (Virtual User Click)
                                 VirtualUser:CaptureController()
                                 VirtualUser:ClickButton1(Vector2.new(800, 600))
+                                
+                                -- Tambahan: Buso Haki Otomatis (Jika belum aktif)
+                                if not LocalPlayer.Character:FindFirstChild("HasBuso") then
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("Buso")
+                                end
+                                
                             until not enemy:Parent() or enemy.Humanoid.Health <= 0
                         end
                     end
@@ -115,123 +155,66 @@ spawn(function()
     end
 end)
 
--- ================= TAB 1: SHOP FIGHTING STYLE (BARU) =================
-local TabShop = Window:CreateTab("Fighting Styles", 4483362458)
+-- ================= TAB 1: AUTO FARM (DENGAN WEAPON SELECT) =================
+local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
 
--- SEA 1 SECTION
-TabShop:CreateSection("--- SEA 1 STYLES ---")
-TabShop:CreateButton({
-    Name = "Beli Dark Step (150k Beli)",
-    Callback = function() BuyStyle("BuyBlackLeg") Rayfield:Notify({Title="Shop", Content="Membeli Dark Step...", Duration=2}) end
-})
-TabShop:CreateButton({
-    Name = "Beli Electro (500k Beli)",
-    Callback = function() BuyStyle("BuyElectro") Rayfield:Notify({Title="Shop", Content="Membeli Electro...", Duration=2}) end
-})
-TabShop:CreateButton({
-    Name = "Beli Water Kung Fu (750k Beli)",
-    Callback = function() BuyStyle("BuyFishmanKarate") Rayfield:Notify({Title="Shop", Content="Membeli Water Kung Fu...", Duration=2}) end
-})
-
--- SEA 2 SECTION
-TabShop:CreateSection("--- SEA 2 STYLES ---")
-TabShop:CreateButton({
-    Name = "Beli Dragon Breath (1.5k Frags)",
-    Callback = function() BuyStyle("BuyDragonBreath") Rayfield:Notify({Title="Shop", Content="Membeli Dragon Breath...", Duration=2}) end
-})
-TabShop:CreateButton({
-    Name = "Beli Superhuman (3M Beli)",
-    Callback = function() BuyStyle("BuySuperhuman") Rayfield:Notify({Title="Shop", Content="Membeli Superhuman...", Duration=2}) end
-})
-TabShop:CreateButton({
-    Name = "Beli Death Step (V2 Dark Step)",
-    Callback = function() BuyStyle("BuyDeathStep") Rayfield:Notify({Title="Shop", Content="Membeli Death Step...", Duration=2}) end
-})
-TabShop:CreateButton({
-    Name = "Beli Sharkman Karate (V2 Water)",
-    Callback = function() BuyStyle("BuySharkmanKarate") Rayfield:Notify({Title="Shop", Content="Membeli Sharkman Karate...", Duration=2}) end
-})
-
--- SEA 3 SECTION
-TabShop:CreateSection("--- SEA 3 STYLES ---")
-TabShop:CreateButton({
-    Name = "Beli Electric Claw (V2 Electro)",
-    Callback = function() BuyStyle("BuyElectricClaw") Rayfield:Notify({Title="Shop", Content="Membeli Electric Claw...", Duration=2}) end
-})
-TabShop:CreateButton({
-    Name = "Beli Dragon Talon (V2 Dragon)",
-    Callback = function() BuyStyle("BuyDragonTalon") Rayfield:Notify({Title="Shop", Content="Membeli Dragon Talon...", Duration=2}) end
-})
-TabShop:CreateButton({
-    Name = "Beli Godhuman (Ultimate)",
-    Callback = function() BuyStyle("BuyGodhuman") Rayfield:Notify({Title="Shop", Content="Membeli Godhuman...", Duration=2}) end
-})
-
--- ================= TAB 2: AUTO RAID (V15) =================
-local TabRaid = Window:CreateTab("Auto Raid", 4483362458)
-TabRaid:CreateSection("Menu Raid")
-TabRaid:CreateButton({
-   Name = "Beli Microchip (Flame)",
-   Callback = function()
-      ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Select", "Flame")
-      task.wait(0.5)
-      ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Buy")
+TabFarm:CreateSection("Konfigurasi Senjata")
+TabFarm:CreateDropdown({
+   Name = "Pilih Senjata (Select Weapon)",
+   Options = {"Melee", "Sword", "Fruit", "Gun"},
+   CurrentOption = "Melee",
+   Callback = function(Option)
+      getgenv().SelectWeapon = Option[1]
+      Rayfield:Notify({Title = "Senjata Dipilih", Content = "Mode Farm: " .. Option[1], Duration = 2})
    end,
 })
-TabRaid:CreateButton({
-   Name = "Auto Start Raid (Lobby)",
-   Callback = function() fireclickdetector(workspace.Map.RaidSummoner.Button.ClickDetector) end,
-})
-TabRaid:CreateToggle({
-   Name = "Auto Kill Aura Dungeon",
+
+TabFarm:CreateSection("Mulai Farming")
+TabFarm:CreateToggle({
+   Name = "Auto Farm Nearest (Full Auto Attack)",
    CurrentValue = false,
-   Callback = function(Value) getgenv().AutoRaid = Value end,
+   Callback = function(v) 
+       getgenv().AutoFarm = v 
+       if v then
+           Rayfield:Notify({Title = "Farm Aktif", Content = "Menggunakan " .. getgenv().SelectWeapon, Duration = 2})
+       end
+   end
 })
 
--- ================= TAB 3: FARMING (V15) =================
-local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
-TabFarm:CreateToggle({Name = "Auto Farm Nearest", CurrentValue = false, Callback = function(v) getgenv().AutoFarm = v end})
+-- ================= TAB 2: SHOP (FIGHTING STYLES) =================
+local TabShop = Window:CreateTab("Fighting Styles", 4483362458)
+local function BuyStyle(styleName) ReplicatedStorage.Remotes.CommF_:InvokeServer(styleName) end
+
+TabShop:CreateSection("--- SEA 1 ---")
+TabShop:CreateButton({Name = "Beli Dark Step (150k)", Callback = function() BuyStyle("BuyBlackLeg") end})
+TabShop:CreateButton({Name = "Beli Electro (500k)", Callback = function() BuyStyle("BuyElectro") end})
+TabShop:CreateButton({Name = "Beli Water Kung Fu (750k)", Callback = function() BuyStyle("BuyFishmanKarate") end})
+
+TabShop:CreateSection("--- SEA 2 ---")
+TabShop:CreateButton({Name = "Beli Dragon Breath (1.5k Frag)", Callback = function() BuyStyle("BuyDragonBreath") end})
+TabShop:CreateButton({Name = "Beli Superhuman (3M)", Callback = function() BuyStyle("BuySuperhuman") end})
+TabShop:CreateButton({Name = "Beli Death Step", Callback = function() BuyStyle("BuyDeathStep") end})
+TabShop:CreateButton({Name = "Beli Sharkman Karate", Callback = function() BuyStyle("BuySharkmanKarate") end})
+
+TabShop:CreateSection("--- SEA 3 ---")
+TabShop:CreateButton({Name = "Beli Electric Claw", Callback = function() BuyStyle("BuyElectricClaw") end})
+TabShop:CreateButton({Name = "Beli Dragon Talon", Callback = function() BuyStyle("BuyDragonTalon") end})
+TabShop:CreateButton({Name = "Beli Godhuman", Callback = function() BuyStyle("BuyGodhuman") end})
+
+-- ================= TAB 3: AUTO RAID (V15) =================
+local TabRaid = Window:CreateTab("Auto Raid", 4483362458)
+TabRaid:CreateSection("Dungeon")
+TabRaid:CreateButton({Name = "Beli Microchip (Flame)", Callback = function() ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Select", "Flame") task.wait(0.5) ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Buy") end})
+TabRaid:CreateButton({Name = "Auto Start Raid", Callback = function() fireclickdetector(workspace.Map.RaidSummoner.Button.ClickDetector) end})
+TabRaid:CreateToggle({Name = "Auto Kill Aura Dungeon", CurrentValue = false, Callback = function(v) getgenv().AutoRaid = v end})
 
 -- ================= TAB 4: VISUAL ESP (V15) =================
 local TabESP = Window:CreateTab("Visual ESP", 4483362458)
-TabESP:CreateToggle({
-   Name = "Neon Player ESP",
-   CurrentValue = false,
-   Callback = function(v) 
-      getgenv().PlayerESP = v 
-      if v then
-          spawn(function()
-              while getgenv().PlayerESP do
-                  for _, p in pairs(Players:GetPlayers()) do
-                      if p ~= LocalPlayer and p.Character then AddHighlight(p.Character, Color3.fromRGB(0, 255, 255), p.Name) end
-                  end
-                  task.wait(2)
-              end
-          end)
-      else ClearESP() end
-   end
-})
-TabESP:CreateToggle({
-   Name = "Neon Fruit ESP",
-   CurrentValue = false,
-   Callback = function(v) 
-      getgenv().FruitESP = v 
-      if v then
-          spawn(function()
-              while getgenv().FruitESP do
-                  for _, f in pairs(Workspace:GetChildren()) do
-                      if f:IsA("Tool") and (f.Name:find("Fruit") or f.Name:find("Blox")) then AddHighlight(f, Color3.fromRGB(255, 0, 255), f.Name) end
-                  end
-                  task.wait(2)
-              end
-          end)
-      else ClearESP() end
-   end
-})
+TabESP:CreateToggle({Name = "Neon Player ESP", CurrentValue = false, Callback = function(v) getgenv().PlayerESP = v if v then spawn(function() while getgenv().PlayerESP do for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character then AddHighlight(p.Character, Color3.fromRGB(0, 255, 255), p.Name) end end task.wait(2) end end) else ClearESP() end end})
+TabESP:CreateToggle({Name = "Neon Fruit ESP", CurrentValue = false, Callback = function(v) getgenv().FruitESP = v if v then spawn(function() while getgenv().FruitESP do for _, f in pairs(Workspace:GetChildren()) do if f:IsA("Tool") and (f.Name:find("Fruit") or f.Name:find("Blox")) then AddHighlight(f, Color3.fromRGB(255, 0, 255), f.Name) end end task.wait(2) end end) else ClearESP() end end})
 
 -- ================= TAB 5: TELEPORT (V15) =================
 local TabTP = Window:CreateTab("Teleportasi", 4483362458)
-
 local S1_Data = { ["Starter Island"] = CFrame.new(1054, 16, 1547), ["Jungle"] = CFrame.new(-1448, 40, 1490), ["Pirate Village"] = CFrame.new(-1150, 40, 3900), ["Prison"] = CFrame.new(4870, 5, 735) }
 local S1_List = {}; for n in pairs(S1_Data) do table.insert(S1_List, n) end
 TabTP:CreateSection("Sea 1")
@@ -247,4 +230,4 @@ local S3_List = {}; for n in pairs(S3_Data) do table.insert(S3_List, n) end
 TabTP:CreateSection("Sea 3")
 TabTP:CreateDropdown({Name = "Pilih Pulau Sea 3", Options = S3_List, Callback = function(o) SafeTween(S3_Data[o[1]]) end})
 
-Rayfield:Notify({Title = "Shop Terbuka", Content = "Gudang Senjata Sea 1-3 Siap Diakses.", Duration = 5})
+Rayfield:Notify({Title = "V17 Weapon Master", Content = "Auto Equip & Auto Attack Siap!", Duration = 5})
