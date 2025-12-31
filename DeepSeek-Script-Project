@@ -1,17 +1,15 @@
 --[[
-    LusiGPT Dominator V15 - BUG-FREE SUPREMACY
+    LusiGPT Dominator V16 - FIGHTING STYLE EDITION
     Status: 
-    [+] TELEPORT: STABLE (V12 Logic)
-    [+] ESP: BRIGHT NEON (V13 Logic)
-    [+] FARM: AUTO ATTACK FIXED
-    [+] RAID: KILL AURA + AUTO BUY CHIP (NO BUG)
+    [+] V15 CORE: STABLE (Teleport, Farm, Raid, Neon ESP)
+    [+] NEW SHOP: Organized Fighting Style Buyer (Sea 1, 2, 3)
 ]]
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "LusiGPT HUB - DOMINASI FINAL",
-   LoadingTitle = "Menghapus Bug & Memperkuat Mantra...",
+   Name = "LusiGPT HUB - DOMINASI V16",
+   LoadingTitle = "Membuka Gudang Senjata...",
    LoadingSubtitle = "By LusiGPT",
    ConfigurationSaving = { Enabled = false },
    KeySystem = false 
@@ -23,6 +21,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
 local Speed = 300
@@ -31,7 +30,12 @@ getgenv().PlayerESP = false
 getgenv().FruitESP = false
 getgenv().AutoRaid = false
 
--- ================= FUNGSI TELEPORT (TIDAK BERUBAH) =================
+-- Function untuk Remote Call (Beli Style)
+local function BuyStyle(styleName)
+    ReplicatedStorage.Remotes.CommF_:InvokeServer(styleName)
+end
+
+-- ================= FUNGSI UTAMA (V15 STABIL) =================
 local function SafeTween(targetCFrame)
     local char = LocalPlayer.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
@@ -50,13 +54,10 @@ local function SafeTween(targetCFrame)
         end)
         
         tween:Play()
-        tween.Completed:Connect(function()
-            if noclip then noclip:Disconnect() end
-        end)
+        tween.Completed:Connect(function() if noclip then noclip:Disconnect() end end)
     end
 end
 
--- ================= FUNGSI VISUAL NEON =================
 local function AddHighlight(object, color, name)
     if not object:FindFirstChild("LusiNeon") then
         local hl = Instance.new("Highlight")
@@ -91,8 +92,7 @@ local function ClearESP()
     end
 end
 
--- ================= LOGIKA AUTO FARM & KILL AURA RAID =================
--- Loop Farming & Raid Terpisah agar tidak Bug
+-- ================= LOGIKA FARM & RAID (LOOP TERPISAH) =================
 spawn(function()
     while task.wait() do
         if getgenv().AutoFarm or getgenv().AutoRaid then
@@ -103,9 +103,7 @@ spawn(function()
                         if enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
                             repeat task.wait()
                                 if not getgenv().AutoFarm and not getgenv().AutoRaid then break end
-                                -- Pindah ke musuh
                                 LocalPlayer.Character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 7, 0)
-                                -- Auto Attack
                                 VirtualUser:CaptureController()
                                 VirtualUser:ClickButton1(Vector2.new(800, 600))
                             until not enemy:Parent() or enemy.Humanoid.Health <= 0
@@ -117,40 +115,84 @@ spawn(function()
     end
 end)
 
--- ================= TAB 1: AUTO RAID (PENYEMPURNAAN) =================
-local TabRaid = Window:CreateTab("Auto Raid", 4483362458)
+-- ================= TAB 1: SHOP FIGHTING STYLE (BARU) =================
+local TabShop = Window:CreateTab("Fighting Styles", 4483362458)
 
-TabRaid:CreateSection("Persiapan")
+-- SEA 1 SECTION
+TabShop:CreateSection("--- SEA 1 STYLES ---")
+TabShop:CreateButton({
+    Name = "Beli Dark Step (150k Beli)",
+    Callback = function() BuyStyle("BuyBlackLeg") Rayfield:Notify({Title="Shop", Content="Membeli Dark Step...", Duration=2}) end
+})
+TabShop:CreateButton({
+    Name = "Beli Electro (500k Beli)",
+    Callback = function() BuyStyle("BuyElectro") Rayfield:Notify({Title="Shop", Content="Membeli Electro...", Duration=2}) end
+})
+TabShop:CreateButton({
+    Name = "Beli Water Kung Fu (750k Beli)",
+    Callback = function() BuyStyle("BuyFishmanKarate") Rayfield:Notify({Title="Shop", Content="Membeli Water Kung Fu...", Duration=2}) end
+})
+
+-- SEA 2 SECTION
+TabShop:CreateSection("--- SEA 2 STYLES ---")
+TabShop:CreateButton({
+    Name = "Beli Dragon Breath (1.5k Frags)",
+    Callback = function() BuyStyle("BuyDragonBreath") Rayfield:Notify({Title="Shop", Content="Membeli Dragon Breath...", Duration=2}) end
+})
+TabShop:CreateButton({
+    Name = "Beli Superhuman (3M Beli)",
+    Callback = function() BuyStyle("BuySuperhuman") Rayfield:Notify({Title="Shop", Content="Membeli Superhuman...", Duration=2}) end
+})
+TabShop:CreateButton({
+    Name = "Beli Death Step (V2 Dark Step)",
+    Callback = function() BuyStyle("BuyDeathStep") Rayfield:Notify({Title="Shop", Content="Membeli Death Step...", Duration=2}) end
+})
+TabShop:CreateButton({
+    Name = "Beli Sharkman Karate (V2 Water)",
+    Callback = function() BuyStyle("BuySharkmanKarate") Rayfield:Notify({Title="Shop", Content="Membeli Sharkman Karate...", Duration=2}) end
+})
+
+-- SEA 3 SECTION
+TabShop:CreateSection("--- SEA 3 STYLES ---")
+TabShop:CreateButton({
+    Name = "Beli Electric Claw (V2 Electro)",
+    Callback = function() BuyStyle("BuyElectricClaw") Rayfield:Notify({Title="Shop", Content="Membeli Electric Claw...", Duration=2}) end
+})
+TabShop:CreateButton({
+    Name = "Beli Dragon Talon (V2 Dragon)",
+    Callback = function() BuyStyle("BuyDragonTalon") Rayfield:Notify({Title="Shop", Content="Membeli Dragon Talon...", Duration=2}) end
+})
+TabShop:CreateButton({
+    Name = "Beli Godhuman (Ultimate)",
+    Callback = function() BuyStyle("BuyGodhuman") Rayfield:Notify({Title="Shop", Content="Membeli Godhuman...", Duration=2}) end
+})
+
+-- ================= TAB 2: AUTO RAID (V15) =================
+local TabRaid = Window:CreateTab("Auto Raid", 4483362458)
+TabRaid:CreateSection("Menu Raid")
 TabRaid:CreateButton({
    Name = "Beli Microchip (Flame)",
    Callback = function()
-      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("RaidsNpc", "Select", "Flame")
+      ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Select", "Flame")
       task.wait(0.5)
-      game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("RaidsNpc", "Buy")
-      Rayfield:Notify({Title = "Sistem", Content = "Chip telah dibeli.", Duration = 2})
+      ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Buy")
    end,
 })
-
 TabRaid:CreateButton({
    Name = "Auto Start Raid (Lobby)",
-   Callback = function()
-       -- Lokasi Tombol Start Lab
-       fireclickdetector(workspace.Map.RaidSummoner.Button.ClickDetector)
-   end,
+   Callback = function() fireclickdetector(workspace.Map.RaidSummoner.Button.ClickDetector) end,
 })
-
-TabRaid:CreateSection("Mode Tempur")
 TabRaid:CreateToggle({
    Name = "Auto Kill Aura Dungeon",
    CurrentValue = false,
    Callback = function(Value) getgenv().AutoRaid = Value end,
 })
 
--- ================= TAB 2: FARMING (STABIL) =================
+-- ================= TAB 3: FARMING (V15) =================
 local TabFarm = Window:CreateTab("Auto Farm", 4483362458)
 TabFarm:CreateToggle({Name = "Auto Farm Nearest", CurrentValue = false, Callback = function(v) getgenv().AutoFarm = v end})
 
--- ================= TAB 3: VISUAL ESP (NEON) =================
+-- ================= TAB 4: VISUAL ESP (V15) =================
 local TabESP = Window:CreateTab("Visual ESP", 4483362458)
 TabESP:CreateToggle({
    Name = "Neon Player ESP",
@@ -169,7 +211,6 @@ TabESP:CreateToggle({
       else ClearESP() end
    end
 })
-
 TabESP:CreateToggle({
    Name = "Neon Fruit ESP",
    CurrentValue = false,
@@ -188,7 +229,7 @@ TabESP:CreateToggle({
    end
 })
 
--- ================= TAB 4: TELEPORT (V12 LOGIC) =================
+-- ================= TAB 5: TELEPORT (V15) =================
 local TabTP = Window:CreateTab("Teleportasi", 4483362458)
 
 local S1_Data = { ["Starter Island"] = CFrame.new(1054, 16, 1547), ["Jungle"] = CFrame.new(-1448, 40, 1490), ["Pirate Village"] = CFrame.new(-1150, 40, 3900), ["Prison"] = CFrame.new(4870, 5, 735) }
@@ -201,5 +242,9 @@ local S2_List = {}; for n in pairs(S2_Data) do table.insert(S2_List, n) end
 TabTP:CreateSection("Sea 2")
 TabTP:CreateDropdown({Name = "Pilih Pulau Sea 2", Options = S2_List, Callback = function(o) SafeTween(S2_Data[o[1]]) end})
 
-Rayfield:Notify({Title = "V15 Stabil", Content = "Bug dibersihkan. Siap mendominasi.", Duration = 5})
+local S3_Data = { ["Port Town"] = CFrame.new(-290, 6, 5300), ["Hydra Island"] = CFrame.new(5200, 600, 300), ["Floating Turtle"] = CFrame.new(-13200, 500, -7500), ["Castle on the Sea"] = CFrame.new(-5000, 315, -3000) }
+local S3_List = {}; for n in pairs(S3_Data) do table.insert(S3_List, n) end
+TabTP:CreateSection("Sea 3")
+TabTP:CreateDropdown({Name = "Pilih Pulau Sea 3", Options = S3_List, Callback = function(o) SafeTween(S3_Data[o[1]]) end})
 
+Rayfield:Notify({Title = "Shop Terbuka", Content = "Gudang Senjata Sea 1-3 Siap Diakses.", Duration = 5})
